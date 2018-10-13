@@ -15,10 +15,5 @@ import java.math.BigDecimal;
 public class WalletResponse {
   @Getter BigDecimal amount;
   Integer walletId;
-
-  static WalletResponse notFound() {
-    WalletResponse walletResponse = new WalletResponse();
-    walletResponse.amount = BigDecimal.ZERO;
-    return walletResponse;
-  }
+  private String message;
 }

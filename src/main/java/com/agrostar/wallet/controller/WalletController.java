@@ -1,7 +1,6 @@
 package com.agrostar.wallet.controller;
 
 import com.agrostar.wallet.converter.Converters;
-import com.agrostar.wallet.converter.WalletNotFoundException;
 import com.agrostar.wallet.dto.WalletResponse;
 import com.agrostar.wallet.entity.Wallet;
 import com.agrostar.wallet.service.TransactionsService;
@@ -20,15 +19,15 @@ public class WalletController {
   @Autowired Converters converters;
 
   @RequestMapping(method = RequestMethod.POST, produces = "application/json")
-  public WalletResponse createWallet() throws WalletNotFoundException {
+  public WalletResponse createWallet() {
     Wallet newWallet = service.createNewWallet();
-    return converters.convertToDto(newWallet);
+    return converters.convertToDto(Optional.of(newWallet));
   }
 
   @RequestMapping(value = "/{walletId}", method = RequestMethod.GET, produces = "application/json")
-  public WalletResponse getWallet(@PathVariable String walletId) throws WalletNotFoundException {
+  public WalletResponse getWallet(@PathVariable String walletId) {
     Optional<Wallet> wallet = service.getWallet(walletId);
-    WalletResponse walletResponse1 = converters.convertToDto(wallet.get());
+    WalletResponse walletResponse1 = converters.convertToDto(wallet);
     return walletResponse1;
   }
 }
