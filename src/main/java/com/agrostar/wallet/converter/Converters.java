@@ -1,6 +1,8 @@
 package com.agrostar.wallet.converter;
 
+import com.agrostar.wallet.dto.TxnResponse;
 import com.agrostar.wallet.dto.WalletResponse;
+import com.agrostar.wallet.entity.Transaction;
 import com.agrostar.wallet.entity.Wallet;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,5 +23,12 @@ public class Converters {
     WalletResponse walletResponse = modelMapper.map(wallet, WalletResponse.class);
     walletResponse.setMessage(HttpStatus.OK.getReasonPhrase());
     return walletResponse;
+  }
+
+  public TxnResponse convertToDto(Transaction transactionEntity) {
+
+      TxnResponse txnResponse = modelMapper.map(transactionEntity, TxnResponse.class);
+    txnResponse.setMessage(HttpStatus.OK.getReasonPhrase());
+    return txnResponse;
   }
 }

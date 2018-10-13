@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/wallets")
+@RequestMapping("/wallet")
 public class WalletController {
   @Autowired TransactionsService service;
   @Autowired Converters converters;
 
   @RequestMapping(method = RequestMethod.POST, produces = "application/json")
   public WalletResponse createWallet() {
-    Wallet newWallet = service.createNewWallet();
+    Wallet newWallet = service.saveWallet();
     return converters.convertToDto(Optional.of(newWallet));
   }
 
