@@ -22,12 +22,13 @@ public class Converters {
     Wallet wallet = walletEntity.get();
     WalletResponse walletResponse = modelMapper.map(wallet, WalletResponse.class);
     walletResponse.setMessage(HttpStatus.OK.getReasonPhrase());
+    walletResponse.setAmount(wallet.getBalance());
     return walletResponse;
   }
 
   public TxnResponse convertToDto(Transaction transactionEntity) {
 
-      TxnResponse txnResponse = modelMapper.map(transactionEntity, TxnResponse.class);
+    TxnResponse txnResponse = modelMapper.map(transactionEntity, TxnResponse.class);
     txnResponse.setMessage(HttpStatus.OK.getReasonPhrase());
     return txnResponse;
   }

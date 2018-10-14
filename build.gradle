@@ -30,6 +30,9 @@ dependencies {
     implementation('com.fasterxml.jackson.core:jackson-databind')
     implementation('org.modelmapper:modelmapper:2.3.0')
     compileOnly('org.projectlombok:lombok')
-    runtimeOnly('com.h2database:h2')
+//    runtimeOnly('org.postgresql:postgresql')
+    runtimeOnly('mysql:mysql-connector-java')
+
+    testImplementation('junit:junit:4.12')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
 }

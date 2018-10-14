@@ -4,6 +4,7 @@ import com.agrostar.wallet.dto.TransactionType;
 import com.agrostar.wallet.dto.Txn;
 import com.agrostar.wallet.dto.TxnResponse;
 import com.agrostar.wallet.dto.WalletResponse;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -40,6 +43,7 @@ public class WalletApplicationTests {
   @Test
   public void contextLoads() {
     WalletResponse wallet = this.createClient();
+    assertThat(wallet.getAmount(), CoreMatchers.is(BigDecimal.ZERO));
     ArrayList<Txn> txns1 = new ArrayList<>();
     Txn add10 = new Txn(BigDecimal.TEN, TransactionType.CREDIT);
     List<Txn> txns = batchTransactions(100, BigDecimal.TEN);
@@ -63,7 +67,9 @@ public class WalletApplicationTests {
     } catch (InterruptedException e) {
       executorService.shutdownNow();
     }
-    System.out.println(getAmountForWallet(String.valueOf(wallet.getWalletId())));
+    BigDecimal amountForWallet = getAmountForWallet(String.valueOf(wallet.getWalletId()));
+    assertThat(amountForWallet, CoreMatchers.is(BigDecimal.TEN));
+    System.out.println(amountForWallet);
   }
 
   public static List<Txn> batchTransactions(int num, BigDecimal amount) {

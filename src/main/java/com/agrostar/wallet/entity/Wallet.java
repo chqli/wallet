@@ -18,10 +18,10 @@ public class Wallet {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer walletId;
 
-  private BigDecimal amount;
+  private BigDecimal balance;
 
   public Wallet() {
-    this.amount = BigDecimal.ZERO;
+    this.balance = BigDecimal.ZERO;
   }
 
   @OneToMany(mappedBy = "wallet")

@@ -1,5 +1,6 @@
 package com.agrostar.wallet.service;
 
+import com.agrostar.wallet.converter.WalletNotFoundException;
 import com.agrostar.wallet.dto.TransactionType;
 import com.agrostar.wallet.dto.Txn;
 import com.agrostar.wallet.entity.Transaction;
@@ -8,8 +9,10 @@ import com.agrostar.wallet.repository.TransactionRepo;
 import com.agrostar.wallet.repository.WalletRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -21,7 +24,7 @@ public class TransactionsService {
   public Wallet saveWallet() {
     Wallet wallet = new Wallet();
     Wallet saved = walletRepo.save(wallet);
-    saved.setAmount(BigDecimal.ZERO);
+    saved.setBalance(BigDecimal.ZERO);
     return saved;
   }
 
@@ -30,16 +33,22 @@ public class TransactionsService {
     return byId;
   }
 
-  @Transactional
-  public Transaction saveTransaction(Wallet wallet, Txn txn) {
+  @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.SERIALIZABLE)
+  public Transaction saveTransaction(String walletId, Txn txn) {
+    Optional<Wallet> byId = walletRepo.findById(Integer.parseInt(walletId));
+    if (!byId.isPresent()) {
+      throw new WalletNotFoundException();
+    }
+    Wallet wallet = byId.get();
     Transaction transaction = new Transaction();
     transaction.setAmount(txn.getAmount());
     transaction.setType(txn.getType());
     transaction.setWallet(wallet);
+    BigDecimal balance = applyTransactionToWallet(txn, wallet.getBalance());
+    wallet.setBalance(balance);
     Transaction save = transactionRepo.save(transaction);
-    BigDecimal balance = applyTransactionToWallet(txn, wallet.getAmount());
-    wallet.setAmount(balance);
-    walletRepo.save(wallet);
+    transactionRepo.flush();
+    walletRepo.flush();
     return save;
   }
 
