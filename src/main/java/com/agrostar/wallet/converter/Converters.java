@@ -4,7 +4,7 @@ import com.agrostar.wallet.dto.TxnResponse;
 import com.agrostar.wallet.dto.WalletResponse;
 import com.agrostar.wallet.entity.Transaction;
 import com.agrostar.wallet.entity.Wallet;
-import com.agrostar.wallet.exceptionhandler.WalletNotFoundException;
+import com.agrostar.wallet.exceptions.WalletNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

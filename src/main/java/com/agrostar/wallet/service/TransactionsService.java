@@ -1,10 +1,10 @@
 package com.agrostar.wallet.service;
 
-import com.agrostar.wallet.exceptionhandler.WalletNotFoundException;
 import com.agrostar.wallet.dto.TransactionType;
 import com.agrostar.wallet.dto.Txn;
 import com.agrostar.wallet.entity.Transaction;
 import com.agrostar.wallet.entity.Wallet;
+import com.agrostar.wallet.exceptions.WalletNotFoundException;
 import com.agrostar.wallet.repository.TransactionRepo;
 import com.agrostar.wallet.repository.WalletRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +35,8 @@ public class TransactionsService {
   }
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
-  @Lock(LockModeType.WRITE)
   public Transaction saveTransaction(String walletId, Txn txn) {
-    Optional<Wallet> byId = walletRepo.findById(Integer.parseInt(walletId));
+    Optional<Wallet> byId = walletRepo.findByIdInWrite(Integer.parseInt(walletId));
     if (!byId.isPresent()) {
       throw new WalletNotFoundException();
     }
@@ -47,9 +46,10 @@ public class TransactionsService {
     transaction.setType(txn.getType());
     transaction.setWallet(wallet);
     BigDecimal balance = applyTransactionToWallet(txn, wallet.getBalance());
+    transactionRepo.save(transaction);
     wallet.setBalance(balance);
-    Transaction save = transactionRepo.save(transaction);
-    return save;
+    wallet.addTransaction(transaction);
+    return transaction;
   }
 
   private BigDecimal applyTransactionToWallet(Txn txn, BigDecimal amount) {

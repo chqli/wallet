@@ -26,4 +26,8 @@ public class Wallet {
 
   @OneToMany(mappedBy = "wallet")
   private List<Transaction> transactions;
+
+  public void addTransaction(Transaction transaction) {
+    this.transactions.add(transaction);
+  }
 }

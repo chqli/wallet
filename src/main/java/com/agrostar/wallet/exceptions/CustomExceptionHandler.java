@@ -1,4 +1,4 @@
-package com.agrostar.wallet.exceptionhandler;
+package com.agrostar.wallet.exceptions;
 
 import com.agrostar.wallet.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;

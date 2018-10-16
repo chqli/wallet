@@ -56,7 +56,7 @@ public class WalletApplicationTests {
           () -> {
             ResponseEntity<TxnResponse> txnResponseResponseEntity =
                 restTemplate.postForEntity(
-                    String.format("/wallet/%s/transaction", String.valueOf(wallet.getWalletId())),
+                    String.format("/wallet/%s/transaction", String.valueOf(1)),
                     txn,
                     TxnResponse.class);
             if (txnResponseResponseEntity.getStatusCode() != HttpStatus.OK) {
@@ -72,7 +72,7 @@ public class WalletApplicationTests {
     } catch (InterruptedException e) {
       executorService.shutdownNow();
     }
-    BigDecimal amountForWallet = getAmountForWallet(String.valueOf(wallet.getWalletId()));
+    BigDecimal amountForWallet = getAmountForWallet(String.valueOf(1));
     assertThat(amountForWallet, CoreMatchers.is(BigDecimal.TEN));
     System.out.println(amountForWallet);
   }
