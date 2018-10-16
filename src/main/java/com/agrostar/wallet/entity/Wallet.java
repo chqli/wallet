@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -17,7 +18,11 @@ public class Wallet {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer walletId;
 
-  public Wallet() {}
+  private BigDecimal balance;
+
+  public Wallet() {
+    this.balance = BigDecimal.ZERO;
+  }
 
   @OneToMany(mappedBy = "wallet")
   private List<Transaction> transactions;

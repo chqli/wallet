@@ -9,16 +9,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
+import java.util.Optional;
 
 @Component
 public class Converters {
   @Autowired ModelMapper modelMapper;
 
-  public WalletResponse convertToDto(Wallet walletEntity, BigDecimal balance) {
-    WalletResponse walletResponse = modelMapper.map(walletEntity, WalletResponse.class);
+  public WalletResponse convertToDto(Optional<Wallet> walletEntity) {
+    if (!walletEntity.isPresent()) {
+      throw new WalletNotFoundException();
+    }
+    Wallet wallet = walletEntity.get();
+    WalletResponse walletResponse = modelMapper.map(wallet, WalletResponse.class);
     walletResponse.setMessage(HttpStatus.OK.getReasonPhrase());
-    walletResponse.setAmount(balance);
+    walletResponse.setAmount(wallet.getBalance());
     return walletResponse;
   }
 

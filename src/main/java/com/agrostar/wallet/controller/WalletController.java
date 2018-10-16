@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/wallet")
@@ -21,14 +21,13 @@ public class WalletController {
   @RequestMapping(method = RequestMethod.POST, produces = "application/json")
   public WalletResponse createWallet() {
     Wallet newWallet = service.saveWallet();
-    return converters.convertToDto(newWallet, BigDecimal.ZERO);
+    return converters.convertToDto(Optional.of(newWallet));
   }
 
   @RequestMapping(value = "/{walletId}", method = RequestMethod.GET, produces = "application/json")
   public WalletResponse getWallet(@PathVariable String walletId) {
-    BigDecimal balance = service.getWalletBalance(walletId);
-    Wallet wallet = service.getWallet(walletId);
-    WalletResponse walletResponse1 = converters.convertToDto(wallet, balance);
+    Optional<Wallet> wallet = service.getWallet(walletId);
+    WalletResponse walletResponse1 = converters.convertToDto(wallet);
     return walletResponse1;
   }
 }
