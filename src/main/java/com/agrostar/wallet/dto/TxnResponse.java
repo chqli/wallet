@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 @NoArgsConstructor
 @Component
-public class TxnResponse {
+public class TxnResponse extends Response {
   Long transactionId;
-  String message;
 }

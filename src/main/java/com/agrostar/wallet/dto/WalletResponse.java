@@ -12,8 +12,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Component
-public class WalletResponse {
+public class WalletResponse extends Response {
   @Getter BigDecimal amount;
-  Integer walletId;
-  private String message;
 }
