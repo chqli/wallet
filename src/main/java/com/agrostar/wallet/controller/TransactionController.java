@@ -2,6 +2,7 @@ package com.agrostar.wallet.controller;
 
 import com.agrostar.wallet.converter.Converters;
 import com.agrostar.wallet.dto.Txn;
+import com.agrostar.wallet.dto.TxnCancellationResponse;
 import com.agrostar.wallet.dto.TxnResponse;
 import com.agrostar.wallet.entity.Transaction;
 import com.agrostar.wallet.service.TransactionsService;
@@ -19,5 +20,20 @@ public class TransactionController {
 
     Transaction newTransaction = service.saveTransaction(walletId, txn);
     return converters.convertToDto(newTransaction);
+  }
+
+  @RequestMapping(
+      value = "/{transactionId}",
+      method = RequestMethod.DELETE,
+      produces = "application/json")
+  public TxnResponse deleteTransaction(
+      @PathVariable String walletId, @PathVariable String transactionId) {
+
+    Transaction newTransaction = service.deleteTransaction(walletId, transactionId);
+    TxnResponse txnResponse = converters.convertToDto(newTransaction);
+    TxnCancellationResponse txnCancellationResponse = new TxnCancellationResponse();
+    txnCancellationResponse.setTransactionId(newTransaction.getId());
+    txnCancellationResponse.setStatus(newTransaction.getStatus());
+    return txnCancellationResponse;
   }
 }

@@ -1,19 +1,19 @@
 package com.agrostar.wallet.service;
 
+import com.agrostar.wallet.dto.TransactionStatus;
 import com.agrostar.wallet.dto.TransactionType;
 import com.agrostar.wallet.dto.Txn;
 import com.agrostar.wallet.entity.Transaction;
 import com.agrostar.wallet.entity.Wallet;
+import com.agrostar.wallet.exceptions.TransactionNotFoundException;
 import com.agrostar.wallet.exceptions.WalletNotFoundException;
 import com.agrostar.wallet.repository.TransactionRepo;
 import com.agrostar.wallet.repository.WalletRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.LockModeType;
 import java.math.BigDecimal;
 import java.util.Optional;
 
@@ -36,7 +36,7 @@ public class TransactionsService {
 
   @Transactional(isolation = Isolation.SERIALIZABLE)
   public Transaction saveTransaction(String walletId, Txn txn) {
-    Optional<Wallet> byId = walletRepo.findByIdInWrite(Integer.parseInt(walletId));
+    Optional<Wallet> byId = walletRepo.findByIdInWriteMode(Integer.parseInt(walletId));
     if (!byId.isPresent()) {
       throw new WalletNotFoundException();
     }
@@ -57,5 +57,32 @@ public class TransactionsService {
       return amount.add(txn.getAmount());
     }
     return amount.subtract(txn.getAmount());
+  }
+
+  private BigDecimal undoTransactionToWallet(Txn txn, BigDecimal amount) {
+    if (txn.getType() == TransactionType.DEBIT) {
+      return amount.add(txn.getAmount());
+    }
+    return amount.subtract(txn.getAmount());
+  }
+
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public Transaction deleteTransaction(String walletId, String transactionId) {
+    Optional<Wallet> byId = walletRepo.findByIdInWriteMode(Integer.parseInt(walletId));
+    if (!byId.isPresent()) {
+      throw new WalletNotFoundException();
+    }
+    Wallet wallet = byId.get();
+    Optional<Transaction> byId1 = transactionRepo.findById(Long.valueOf(transactionId));
+    if (byId1.isPresent() && byId1.get().getWallet().getWalletId() == Integer.parseInt(walletId)) {
+      byId1.get().setStatus(TransactionStatus.CANCELLED);
+      BigDecimal bigDecimal =
+          undoTransactionToWallet(
+              new Txn(byId1.get().getAmount(), byId1.get().getType()), wallet.getBalance());
+      wallet.setBalance(bigDecimal);
+      return byId1.get();
+    } else {
+      throw new TransactionNotFoundException();
+    }
   }
 }

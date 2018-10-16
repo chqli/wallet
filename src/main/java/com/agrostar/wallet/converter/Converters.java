@@ -1,5 +1,6 @@
 package com.agrostar.wallet.converter;
 
+import com.agrostar.wallet.dto.TxnCancellationResponse;
 import com.agrostar.wallet.dto.TxnResponse;
 import com.agrostar.wallet.dto.WalletResponse;
 import com.agrostar.wallet.entity.Transaction;
