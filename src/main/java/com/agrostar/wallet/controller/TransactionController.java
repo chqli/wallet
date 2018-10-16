@@ -1,10 +1,7 @@
 package com.agrostar.wallet.controller;
 
 import com.agrostar.wallet.converter.Converters;
-import com.agrostar.wallet.dto.PassBookResponse;
-import com.agrostar.wallet.dto.Txn;
-import com.agrostar.wallet.dto.TxnCancellationResponse;
-import com.agrostar.wallet.dto.TxnResponse;
+import com.agrostar.wallet.dto.*;
 import com.agrostar.wallet.entity.Transaction;
 import com.agrostar.wallet.entity.Wallet;
 import com.agrostar.wallet.exceptions.WalletNotFoundException;
@@ -23,6 +20,7 @@ public class TransactionController {
   @RequestMapping(method = RequestMethod.POST, produces = "application/json")
   public TxnResponse createTransaction(@PathVariable String walletId, @RequestBody Txn txn) {
 
+    txn.setStatus(TransactionStatus.ACTIVE);
     Transaction newTransaction = service.saveTransaction(walletId, txn);
     return converters.convertToDto(newTransaction);
   }

@@ -8,8 +8,4 @@ import org.springframework.stereotype.Repository;
 import sun.print.resources.serviceui_zh_TW;
 
 @Repository
-public interface TransactionRepo extends JpaRepository<Transaction, Long> {
-
-  @Query(value = "update Transaction T set T.status='CANCELLED' where T.id=:transactionId")
-  boolean cancelTransaction(@Param("transactionId") Long transactionId);
-}
+public interface TransactionRepo extends JpaRepository<Transaction, Long> {}

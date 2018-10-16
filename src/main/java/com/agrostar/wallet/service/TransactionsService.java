@@ -5,10 +5,13 @@ import com.agrostar.wallet.dto.TransactionType;
 import com.agrostar.wallet.dto.Txn;
 import com.agrostar.wallet.entity.Transaction;
 import com.agrostar.wallet.entity.Wallet;
+import com.agrostar.wallet.exceptions.TransactionFailedException;
 import com.agrostar.wallet.exceptions.TransactionNotFoundException;
+import com.agrostar.wallet.exceptions.WalletLimitExceededException;
 import com.agrostar.wallet.exceptions.WalletNotFoundException;
 import com.agrostar.wallet.repository.TransactionRepo;
 import com.agrostar.wallet.repository.WalletRepo;
+import com.agrostar.wallet.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -34,7 +37,7 @@ public class TransactionsService {
     return byId;
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = TransactionFailedException.class)
   public Transaction saveTransaction(String walletId, Txn txn) {
     Optional<Wallet> byId = walletRepo.findByIdInWriteMode(Integer.parseInt(walletId));
     if (!byId.isPresent()) {
@@ -45,11 +48,31 @@ public class TransactionsService {
     transaction.setAmount(txn.getAmount());
     transaction.setType(txn.getType());
     transaction.setWallet(wallet);
-    BigDecimal balance = applyTransactionToWallet(txn, wallet.getBalance());
+    BigDecimal balance = null;
+    try {
+      balance = handleTransactionToWallet(txn, wallet.getBalance());
+    } catch (WalletLimitExceededException e) {
+      throw new TransactionFailedException();
+    }
     transactionRepo.save(transaction);
     wallet.setBalance(balance);
     wallet.addTransaction(transaction);
     return transaction;
+  }
+
+  private BigDecimal handleTransactionToWallet(Txn txn, BigDecimal amount)
+      throws WalletLimitExceededException {
+    BigDecimal updatedBalance;
+    if (txn.getStatus() == TransactionStatus.ACTIVE) {
+      updatedBalance = applyTransactionToWallet(txn, amount);
+
+    } else {
+      updatedBalance = undoTransactionToWallet(txn, amount);
+    }
+    if (updatedBalance.doubleValue() < -1 * Constants.NEGATIVE_BALANCE_CAP) {
+      throw new WalletLimitExceededException();
+    }
+    return updatedBalance;
   }
 
   private BigDecimal applyTransactionToWallet(Txn txn, BigDecimal amount) {
@@ -66,7 +89,7 @@ public class TransactionsService {
     return amount.subtract(txn.getAmount());
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
+  @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = TransactionFailedException.class)
   public Transaction deleteTransaction(String walletId, String transactionId) {
     Optional<Wallet> byId = walletRepo.findByIdInWriteMode(Integer.parseInt(walletId));
     if (!byId.isPresent()) {
@@ -76,10 +99,16 @@ public class TransactionsService {
     Optional<Transaction> byId1 = transactionRepo.findById(Long.valueOf(transactionId));
     if (byId1.isPresent() && byId1.get().getWallet().getWalletId() == Integer.parseInt(walletId)) {
       byId1.get().setStatus(TransactionStatus.CANCELLED);
-      BigDecimal bigDecimal =
-          undoTransactionToWallet(
-              new Txn(byId1.get().getAmount(), byId1.get().getType(), TransactionStatus.CANCELLED),
-              wallet.getBalance());
+      BigDecimal bigDecimal = null;
+      try {
+        bigDecimal =
+            handleTransactionToWallet(
+                new Txn(
+                    byId1.get().getAmount(), byId1.get().getType(), TransactionStatus.CANCELLED),
+                wallet.getBalance());
+      } catch (WalletLimitExceededException e) {
+        throw new TransactionFailedException();
+      }
       wallet.setBalance(bigDecimal);
       return byId1.get();
     } else {
