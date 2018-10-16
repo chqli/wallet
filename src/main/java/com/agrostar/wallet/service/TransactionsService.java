@@ -78,7 +78,8 @@ public class TransactionsService {
       byId1.get().setStatus(TransactionStatus.CANCELLED);
       BigDecimal bigDecimal =
           undoTransactionToWallet(
-              new Txn(byId1.get().getAmount(), byId1.get().getType()), wallet.getBalance());
+              new Txn(byId1.get().getAmount(), byId1.get().getType(), TransactionStatus.CANCELLED),
+              wallet.getBalance());
       wallet.setBalance(bigDecimal);
       return byId1.get();
     } else {
