@@ -37,7 +37,9 @@ public class TransactionsService {
     return byId;
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = TransactionFailedException.class)
+  @Transactional(
+      isolation = Isolation.READ_COMMITTED,
+      rollbackFor = TransactionFailedException.class)
   public Transaction saveTransaction(String walletId, Txn txn) {
     Optional<Wallet> byId = walletRepo.findByIdInWriteMode(Integer.parseInt(walletId));
     if (!byId.isPresent()) {
@@ -89,7 +91,9 @@ public class TransactionsService {
     return amount.subtract(txn.getAmount());
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = TransactionFailedException.class)
+  @Transactional(
+      isolation = Isolation.READ_COMMITTED,
+      rollbackFor = TransactionFailedException.class)
   public Transaction deleteTransaction(String walletId, String transactionId) {
     Optional<Wallet> byId = walletRepo.findByIdInWriteMode(Integer.parseInt(walletId));
     if (!byId.isPresent()) {

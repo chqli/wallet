@@ -1,9 +1,6 @@
 package com.agrostar.wallet;
 
-import com.agrostar.wallet.dto.TransactionType;
-import com.agrostar.wallet.dto.Txn;
-import com.agrostar.wallet.dto.TxnResponse;
-import com.agrostar.wallet.dto.WalletResponse;
+import com.agrostar.wallet.dto.*;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -46,7 +44,7 @@ public class WalletApplicationTests {
     WalletResponse wallet = this.createClient();
     assertThat(wallet.getAmount(), CoreMatchers.is(BigDecimal.ZERO));
     ArrayList<Txn> txns1 = new ArrayList<>();
-    Txn add10 = new Txn(BigDecimal.TEN, TransactionType.CREDIT);
+    Txn add10 = new Txn(BigDecimal.TEN, TransactionType.CREDIT, null);
     List<Txn> txns = batchTransactions(100, BigDecimal.TEN);
     txns1.add(add10);
     txns1.addAll(txns);
@@ -73,17 +71,16 @@ public class WalletApplicationTests {
       executorService.shutdownNow();
     }
     BigDecimal amountForWallet = getAmountForWallet(String.valueOf(1));
-    assertThat(amountForWallet, CoreMatchers.is(BigDecimal.TEN));
-    System.out.println(amountForWallet);
+    assertThat(amountForWallet, CoreMatchers.is(BigDecimal.TEN.setScale(2, RoundingMode.HALF_UP)));
   }
 
   public static List<Txn> batchTransactions(int num, BigDecimal amount) {
     ArrayList<Txn> txns = new ArrayList<>();
     for (int i = 0; i < num; i++) {
       if (i % 2 == 0) {
-        txns.add(new Txn(amount, TransactionType.CREDIT));
+        txns.add(new Txn(amount, TransactionType.CREDIT, null));
       } else {
-        txns.add(new Txn(amount, TransactionType.DEBIT));
+        txns.add(new Txn(amount, TransactionType.DEBIT, null));
       }
     }
     return txns;
