@@ -18,6 +18,9 @@ public class TransactionController {
   public TxnResponse createTransaction(@PathVariable String walletId, @RequestBody Txn txn) {
 
     Transaction newTransaction = service.saveTransaction(walletId, txn);
+    if (newTransaction == null) {
+      System.out.println("walla");
+    }
     return converters.convertToDto(newTransaction);
   }
 }

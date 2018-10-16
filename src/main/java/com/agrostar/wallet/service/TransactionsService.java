@@ -9,9 +9,6 @@ import com.agrostar.wallet.repository.TransactionRepo;
 import com.agrostar.wallet.repository.WalletRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -24,32 +21,34 @@ public class TransactionsService {
   public Wallet saveWallet() {
     Wallet wallet = new Wallet();
     Wallet saved = walletRepo.save(wallet);
-    saved.setBalance(BigDecimal.ZERO);
     return saved;
   }
 
-  public Optional<Wallet> getWallet(String walletId) {
-    Optional<Wallet> byId = walletRepo.findById(Integer.parseInt(walletId));
-    return byId;
-  }
-
-  @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.SERIALIZABLE)
-  public Transaction saveTransaction(String walletId, Txn txn) {
+  public BigDecimal getWalletBalance(String walletId) {
     Optional<Wallet> byId = walletRepo.findById(Integer.parseInt(walletId));
     if (!byId.isPresent()) {
       throw new WalletNotFoundException();
     }
-    Wallet wallet = byId.get();
+    return transactionRepo.getBalance(Integer.parseInt(walletId));
+  }
+
+  public Wallet getWallet(String walletId) {
+    Optional<Wallet> byId = walletRepo.findById(Integer.parseInt(walletId));
+    if (!byId.isPresent()) {
+      throw new WalletNotFoundException();
+    }
+
+    return byId.get();
+  }
+
+  public Transaction saveTransaction(String walletId, Txn txn) {
+
+    Wallet wallet = getWallet(walletId);
     Transaction transaction = new Transaction();
     transaction.setAmount(txn.getAmount());
     transaction.setType(txn.getType());
     transaction.setWallet(wallet);
-    BigDecimal balance = applyTransactionToWallet(txn, wallet.getBalance());
-    wallet.setBalance(balance);
-    Transaction save = transactionRepo.save(transaction);
-    transactionRepo.flush();
-    walletRepo.flush();
-    return save;
+    return transactionRepo.save(transaction);
   }
 
   private BigDecimal applyTransactionToWallet(Txn txn, BigDecimal amount) {

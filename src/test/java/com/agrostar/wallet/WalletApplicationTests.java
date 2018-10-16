@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -53,10 +54,18 @@ public class WalletApplicationTests {
     for (Txn txn : txns1) {
       executorService.submit(
           () -> {
-            restTemplate.postForEntity(
-                String.format("/wallet/%s/transaction", String.valueOf(wallet.getWalletId())),
-                txn,
-                TxnResponse.class);
+            try {
+              ResponseEntity<TxnResponse> txnResponseResponseEntity =
+                  restTemplate.postForEntity(
+                      String.format("/wallet/%s/transaction", String.valueOf(wallet.getWalletId())),
+                      txn,
+                      TxnResponse.class);
+              if (txnResponseResponseEntity.getStatusCode() != HttpStatus.OK) {
+                System.out.println("Damn");
+              }
+            } catch (Exception ex) {
+              System.out.println("Nirav");
+            }
           });
     }
     executorService.shutdown();
@@ -68,7 +77,8 @@ public class WalletApplicationTests {
       executorService.shutdownNow();
     }
     BigDecimal amountForWallet = getAmountForWallet(String.valueOf(wallet.getWalletId()));
-    assertThat(amountForWallet, CoreMatchers.is(BigDecimal.TEN));
+    assertThat(
+        amountForWallet, CoreMatchers.is(BigDecimal.TEN.setScale(2, BigDecimal.ROUND_HALF_UP)));
     System.out.println(amountForWallet);
   }
 
