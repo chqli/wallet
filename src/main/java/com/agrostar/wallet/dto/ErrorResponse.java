@@ -1,9 +1,10 @@
 package com.agrostar.wallet.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Component;
 
-@Data
+@EqualsAndHashCode
 @Component
 public class ErrorResponse extends Response {
   public ErrorResponse(String message, String details) {

@@ -40,7 +40,7 @@ public class WalletApplicationTests {
   }
 
   @Test
-  public void contextLoads() {
+  public void testParallelTransactionsOnAWallet() {
     WalletResponse wallet = this.createClient();
     assertThat(wallet.getAmount(), CoreMatchers.is(BigDecimal.ZERO));
     ArrayList<Txn> txns1 = new ArrayList<>();
