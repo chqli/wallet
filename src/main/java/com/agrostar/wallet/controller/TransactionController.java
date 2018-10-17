@@ -44,10 +44,6 @@ public class TransactionController {
       @PathVariable String walletId, @PathVariable String transactionId) {
 
     Transaction newTransaction = service.deleteTransaction(walletId, transactionId);
-    TxnResponse txnResponse = converters.convertToDto(newTransaction);
-    TxnCancellationResponse txnCancellationResponse = new TxnCancellationResponse();
-    txnCancellationResponse.setTransactionId(newTransaction.getId());
-    txnCancellationResponse.setStatus(newTransaction.getStatus());
-    return txnCancellationResponse;
+    return converters.converttoFullTransactionResponse(newTransaction);
   }
 }
