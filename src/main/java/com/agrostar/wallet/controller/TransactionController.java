@@ -30,7 +30,7 @@ public class TransactionController {
 
     Optional<Wallet> newTransaction = service.getWallet(walletId);
     if (!newTransaction.isPresent()) {
-      throw new WalletNotFoundException();
+      throw new WalletNotFoundException("Wallet not found");
     }
     Wallet wallet = newTransaction.get();
     return converters.convertToPassBook(wallet);

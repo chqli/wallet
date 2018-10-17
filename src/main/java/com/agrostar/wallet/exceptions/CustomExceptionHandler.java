@@ -13,14 +13,31 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(Exception.class)
   public final ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
-    ErrorResponse error = new ErrorResponse("Server Error", "details");
+    ErrorResponse error = new ErrorResponse("Server Error", ex.getMessage());
     return new ResponseEntity(error, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   @ExceptionHandler(WalletNotFoundException.class)
-  public final ResponseEntity<Object> handleUserNotFoundException(
+  public final ResponseEntity<Object> handleWalletNotFoundException(
       WalletNotFoundException ex, WebRequest request) {
-    ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.getReasonPhrase());
+    ErrorResponse error =
+        new ErrorResponse(HttpStatus.NOT_FOUND.getReasonPhrase(), ex.getMessage());
     return new ResponseEntity(error, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(TransactionNotFoundException.class)
+  public final ResponseEntity<Object> handleTransactionNotFoundException(
+      TransactionNotFoundException ex, WebRequest request) {
+    ErrorResponse error =
+        new ErrorResponse(HttpStatus.NOT_FOUND.getReasonPhrase(), ex.getMessage());
+    return new ResponseEntity(error, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(TransactionFailedException.class)
+  public final ResponseEntity<Object> handleTransactionFailedException(
+      TransactionFailedException ex, WebRequest request) {
+    ErrorResponse error =
+        new ErrorResponse(HttpStatus.BAD_REQUEST.getReasonPhrase(), ex.getMessage());
+    return new ResponseEntity(error, HttpStatus.BAD_REQUEST);
   }
 }

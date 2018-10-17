@@ -18,7 +18,7 @@ public class Converters {
 
   public WalletResponse convertToDto(Optional<Wallet> walletEntity) {
     if (!walletEntity.isPresent()) {
-      throw new WalletNotFoundException();
+      throw new WalletNotFoundException("Wallet not found");
     }
     Wallet wallet = walletEntity.get();
     WalletResponse walletResponse = modelMapper.map(wallet, WalletResponse.class);
