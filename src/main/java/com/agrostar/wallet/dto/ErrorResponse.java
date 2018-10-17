@@ -4,7 +4,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Component;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
+@Data
 @Component
 public class ErrorResponse extends Response {
   public ErrorResponse(String message, String details) {

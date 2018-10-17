@@ -5,10 +5,11 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Component
-@EqualsAndHashCode
+@Data
 public class WalletResponse extends Response {
   @Getter BigDecimal amount;
 }
