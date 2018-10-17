@@ -16,23 +16,24 @@ import java.util.stream.Collectors;
 public class Converters {
   @Autowired ModelMapper modelMapper;
 
-  public WalletResponse convertToDto(Optional<Wallet> walletEntity) {
+  public WalletResponse toDto(Optional<Wallet> walletEntity) {
     if (!walletEntity.isPresent()) {
       throw new WalletNotFoundException("Wallet not found");
     }
     Wallet wallet = walletEntity.get();
-    WalletResponse walletResponse = modelMapper.map(wallet, WalletResponse.class);
+    WalletResponse walletResponse = new WalletResponse();
     walletResponse.setAmount(wallet.getBalance());
     return walletResponse;
   }
 
-  public TxnResponse convertToDto(Transaction transactionEntity) {
+  public TxnResponse toDto(Transaction transactionEntity) {
 
-    TxnResponse txnResponse = modelMapper.map(transactionEntity, TxnResponse.class);
+    TxnResponse txnResponse = new TxnResponse();
+    txnResponse.setTransactionId(transactionEntity.getId());
     return txnResponse;
   }
 
-  public TxnCancellationResponse converttoFullTransactionResponse(Transaction transactionEntity) {
+  public TxnCancellationResponse toCancellation(Transaction transactionEntity) {
 
     TxnCancellationResponse txnCancellationResponse = new TxnCancellationResponse();
     txnCancellationResponse.setTransactionId(transactionEntity.getId());
@@ -40,7 +41,7 @@ public class Converters {
     return txnCancellationResponse;
   }
 
-  public PassBookResponse convertToPassBook(Wallet wallet) {
+  public PassBookResponse toPassBook(Wallet wallet) {
     List<Txn> txns =
         wallet
             .getTransactions()

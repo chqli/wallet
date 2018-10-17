@@ -18,22 +18,22 @@ public class TransactionController {
   @Autowired Converters converters;
 
   @RequestMapping(method = RequestMethod.POST, produces = "application/json")
-  public TxnResponse createTransaction(@PathVariable String walletId, @RequestBody Txn txn) {
+  public TxnResponse createTransaction(@PathVariable Integer walletId, @RequestBody Txn txn) {
 
     txn.setStatus(TransactionStatus.ACTIVE);
     Transaction newTransaction = service.saveTransaction(walletId, txn);
-    return converters.convertToDto(newTransaction);
+    return converters.toDto(newTransaction);
   }
 
   @RequestMapping(method = RequestMethod.GET, produces = "application/json")
-  public PassBookResponse getPassBook(@PathVariable String walletId) {
+  public PassBookResponse getPassBook(@PathVariable Integer walletId) {
 
     Optional<Wallet> newTransaction = service.getWallet(walletId);
     if (!newTransaction.isPresent()) {
       throw new WalletNotFoundException("Wallet not found");
     }
     Wallet wallet = newTransaction.get();
-    return converters.convertToPassBook(wallet);
+    return converters.toPassBook(wallet);
   }
 
   @RequestMapping(
@@ -41,9 +41,9 @@ public class TransactionController {
       method = RequestMethod.DELETE,
       produces = "application/json")
   public TxnResponse deleteTransaction(
-      @PathVariable String walletId, @PathVariable String transactionId) {
+      @PathVariable Integer walletId, @PathVariable String transactionId) {
 
     Transaction newTransaction = service.deleteTransaction(walletId, transactionId);
-    return converters.converttoFullTransactionResponse(newTransaction);
+    return converters.toCancellation(newTransaction);
   }
 }

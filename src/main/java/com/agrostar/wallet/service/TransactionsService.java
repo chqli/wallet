@@ -33,32 +33,29 @@ public class TransactionsService {
 
   public Wallet saveWallet() {
     Wallet wallet = new Wallet();
-    Wallet saved = walletRepo.save(wallet);
-    saved.setBalance(BigDecimal.ZERO);
-    return saved;
+    return walletRepo.save(wallet);
   }
 
-  public Optional<Wallet> getWallet(String walletId) {
-    Optional<Wallet> byId = walletRepo.findById(Integer.parseInt(walletId));
-    return byId;
+  public Optional<Wallet> getWallet(Integer walletId) {
+    return walletRepo.findById(walletId);
   }
 
   @Transactional(
       isolation = Isolation.READ_COMMITTED,
       rollbackFor = TransactionFailedException.class)
-  public Transaction saveTransaction(String walletId, Txn txn) {
-    Optional<Wallet> byId = walletRepo.findByIdInWriteMode(Integer.parseInt(walletId));
+  public Transaction saveTransaction(Integer walletId, Txn txn) {
+    Optional<Wallet> byId = walletRepo.findByIdInWriteMode(walletId);
     if (!byId.isPresent()) {
-      throw new WalletNotFoundException("sdfg");
+      throw new WalletNotFoundException("Wallet not found");
     }
     Wallet wallet = byId.get();
     Transaction transaction = new Transaction();
     transaction.setAmount(txn.getAmount());
     transaction.setType(txn.getType());
     transaction.setWallet(wallet);
-    BigDecimal balance = null;
+    BigDecimal balance;
     try {
-      balance = handleTransactionToWallet(txn, wallet.getBalance());
+      balance = applyAndValidate(txn, wallet.getBalance());
     } catch (WalletLimitExceededException e) {
       throw new TransactionFailedException("Wallet limit exceeded");
     }
@@ -68,7 +65,7 @@ public class TransactionsService {
     return transaction;
   }
 
-  private BigDecimal handleTransactionToWallet(Txn txn, BigDecimal amount)
+  private BigDecimal applyAndValidate(Txn txn, BigDecimal amount)
       throws WalletLimitExceededException {
     BigDecimal updatedBalance;
     if (txn.getStatus() == TransactionStatus.ACTIVE) {
@@ -99,28 +96,30 @@ public class TransactionsService {
 
   @Transactional(
       isolation = Isolation.READ_COMMITTED,
-      rollbackFor = TransactionFailedException.class)
-  public Transaction deleteTransaction(String walletId, String transactionId) {
-    Optional<Wallet> byId = walletRepo.findByIdInWriteMode(Integer.parseInt(walletId));
+      rollbackFor = {TransactionFailedException.class, TransactionNotFoundException.class})
+  public Transaction deleteTransaction(Integer walletId, String transactionId) {
+    Optional<Wallet> byId = walletRepo.findByIdInWriteMode(walletId);
     if (!byId.isPresent()) {
       throw new WalletNotFoundException("Wallet not found");
     }
     Wallet wallet = byId.get();
-    Optional<Transaction> byId1 = transactionRepo.findById(Long.valueOf(transactionId));
-    if (byId1.isPresent() && byId1.get().getWallet().getWalletId() == Integer.parseInt(walletId)) {
-      byId1.get().setStatus(TransactionStatus.CANCELLED);
-      BigDecimal bigDecimal = null;
+    Optional<Transaction> transactionById = transactionRepo.findById(Long.valueOf(transactionId));
+    if (transactionById.isPresent()
+        && transactionById.get().getWallet().getWalletId().equals(walletId)) {
+      Transaction transaction = transactionById.get();
+      transaction.setStatus(TransactionStatus.CANCELLED);
+      BigDecimal bigDecimal;
       try {
         bigDecimal =
-            handleTransactionToWallet(
+            applyAndValidate(
                 new Txn(
-                    byId1.get().getAmount(), byId1.get().getType(), TransactionStatus.CANCELLED),
+                    transaction.getAmount(), transaction.getType(), TransactionStatus.CANCELLED),
                 wallet.getBalance());
       } catch (WalletLimitExceededException e) {
         throw new TransactionFailedException("Wallet limit exceeded");
       }
       wallet.setBalance(bigDecimal);
-      return byId1.get();
+      return transaction;
     } else {
       throw new TransactionNotFoundException("Transaction not found");
     }

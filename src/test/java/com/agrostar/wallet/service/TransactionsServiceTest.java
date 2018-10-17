@@ -48,7 +48,7 @@ public class TransactionsServiceTest {
     Txn txn = new Txn(BigDecimal.ONE, TransactionType.CREDIT, TransactionStatus.ACTIVE);
     when(walletRepo.findByIdInWriteMode(1)).thenReturn(Optional.ofNullable(wallet));
     // Act
-    transactionsService.saveTransaction(String.valueOf(1), txn);
+    transactionsService.saveTransaction(1, txn);
     // Assert
     assertThat(wallet.getTransactions().size(), is(2));
     assertThat(wallet.getBalance(), is(new BigDecimal(11)));
@@ -59,7 +59,7 @@ public class TransactionsServiceTest {
     Txn txn = new Txn(BigDecimal.ONE, TransactionType.DEBIT, TransactionStatus.ACTIVE);
     when(walletRepo.findByIdInWriteMode(1)).thenReturn(Optional.ofNullable(wallet));
     // Act
-    transactionsService.saveTransaction(String.valueOf(1), txn);
+    transactionsService.saveTransaction(1, txn);
     // Assert
     assertThat(wallet.getTransactions().size(), is(2));
     assertThat(wallet.getBalance(), is(new BigDecimal(9)));
@@ -74,7 +74,7 @@ public class TransactionsServiceTest {
             TransactionStatus.ACTIVE);
     when(walletRepo.findByIdInWriteMode(1)).thenReturn(Optional.ofNullable(wallet));
     try {
-      transactionsService.saveTransaction(String.valueOf(1), txn);
+      transactionsService.saveTransaction(1, txn);
       Assert.fail("Should throw Exception");
     } catch (TransactionFailedException tef) {
       assertThat(wallet.getTransactions().size(), is(1));
@@ -94,7 +94,7 @@ public class TransactionsServiceTest {
     when(walletRepo.findByIdInWriteMode(1)).thenReturn(Optional.ofNullable(wallet));
     when(transactionRepo.findById(1L)).thenReturn(Optional.of(txn));
     try {
-      transactionsService.deleteTransaction(String.valueOf(1), String.valueOf(1L));
+      transactionsService.deleteTransaction(1, String.valueOf(1L));
       Assert.fail("Should throw exception");
     } catch (TransactionFailedException tef) {
       assertThat(wallet.getTransactions().size(), is(1));

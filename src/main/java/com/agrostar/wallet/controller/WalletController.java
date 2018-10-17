@@ -20,14 +20,13 @@ public class WalletController {
 
   @RequestMapping(method = RequestMethod.POST, produces = "application/json")
   public WalletResponse createWallet() {
-    Wallet newWallet = service.saveWallet();
-    return converters.convertToDto(Optional.of(newWallet));
+    Wallet wallet = service.saveWallet();
+    return converters.toDto(Optional.of(wallet));
   }
 
   @RequestMapping(value = "/{walletId}", method = RequestMethod.GET, produces = "application/json")
-  public WalletResponse getWallet(@PathVariable String walletId) {
+  public WalletResponse getWallet(@PathVariable Integer walletId) {
     Optional<Wallet> wallet = service.getWallet(walletId);
-    WalletResponse walletResponse1 = converters.convertToDto(wallet);
-    return walletResponse1;
+    return converters.toDto(wallet);
   }
 }
