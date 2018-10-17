@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,7 +26,7 @@ public class Wallet {
   }
 
   @OneToMany(mappedBy = "wallet")
-  private List<Transaction> transactions;
+  private List<Transaction> transactions = new ArrayList<>();
 
   public void addTransaction(Transaction transaction) {
     this.transactions.add(transaction);

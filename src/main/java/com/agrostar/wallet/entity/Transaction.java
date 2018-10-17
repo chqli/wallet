@@ -2,6 +2,7 @@ package com.agrostar.wallet.entity;
 
 import com.agrostar.wallet.dto.TransactionStatus;
 import com.agrostar.wallet.dto.TransactionType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,8 @@ import java.math.BigDecimal;
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
+
 public class Transaction {
 
   @Id

@@ -22,8 +22,14 @@ import java.util.Optional;
 
 @Service
 public class TransactionsService {
-  @Autowired private WalletRepo walletRepo;
-  @Autowired private TransactionRepo transactionRepo;
+  private WalletRepo walletRepo;
+  private TransactionRepo transactionRepo;
+
+  public TransactionsService(
+      @Autowired WalletRepo walletRepo, @Autowired TransactionRepo transactionRepo) {
+    this.walletRepo = walletRepo;
+    this.transactionRepo = transactionRepo;
+  }
 
   public Wallet saveWallet() {
     Wallet wallet = new Wallet();

@@ -4,6 +4,7 @@ buildscript {
     }
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -34,5 +35,6 @@ dependencies {
     runtimeOnly('mysql:mysql-connector-java')
 
     testImplementation('junit:junit:4.12')
+    testImplementation('org.mockito:mockito-core')
     testImplementation('org.springframework.boot:spring-boot-starter-test')
 }
