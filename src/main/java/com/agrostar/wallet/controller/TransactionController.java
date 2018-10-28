@@ -25,6 +25,19 @@ public class TransactionController {
     return converters.toDto(newTransaction);
   }
 
+  @RequestMapping(
+      value = "/{toWalletId}",
+      method = RequestMethod.POST,
+      produces = "application/json")
+  public TransferResponse transferAmount(
+      @PathVariable Integer walletId,
+      @PathVariable Integer toWalletId,
+      @RequestBody Amount amount) {
+
+    service.transferFunds(walletId, toWalletId, amount);
+    return converters.toDto(toWalletId, amount);
+  }
+
   @RequestMapping(method = RequestMethod.GET, produces = "application/json")
   public PassBookResponse getPassBook(@PathVariable Integer walletId) {
 

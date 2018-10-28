@@ -1,5 +1,6 @@
 package com.agrostar.wallet.service;
 
+import com.agrostar.wallet.dto.Amount;
 import com.agrostar.wallet.dto.TransactionStatus;
 import com.agrostar.wallet.dto.TransactionType;
 import com.agrostar.wallet.dto.Txn;
@@ -123,5 +124,15 @@ public class TransactionsService {
     } else {
       throw new TransactionNotFoundException("Transaction not found");
     }
+  }
+
+  @Transactional(
+      isolation = Isolation.READ_COMMITTED,
+      rollbackFor = {TransactionFailedException.class, WalletNotFoundException.class})
+  public void transferFunds(Integer fromWalletId, Integer toWalletId, Amount amount) {
+    Txn fromTxn = new Txn(amount.getAmount(), TransactionType.DEBIT, TransactionStatus.ACTIVE);
+    Txn toTxn = new Txn(amount.getAmount(), TransactionType.CREDIT, TransactionStatus.ACTIVE);
+    Transaction fromT = saveTransaction(fromWalletId, fromTxn);
+    Transaction toT = saveTransaction(toWalletId, toTxn);
   }
 }

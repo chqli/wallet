@@ -52,4 +52,8 @@ public class Converters {
     passBookResponse.setTransactions(txns);
     return passBookResponse;
   }
+
+  public TransferResponse toDto(Integer toWalletId, Amount amount) {
+    return new TransferResponse(toWalletId, amount.getAmount());
+  }
 }
